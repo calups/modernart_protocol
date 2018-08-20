@@ -9,12 +9,14 @@ class SimpleModernArt(object):
         self.base_info = {
             "player_size": player_size,
             "sell_price": [30, 20, 10],
+            "hand_receive_per_round": [8, 3, 3, 0],
             "total_paintings": [12, 13, 14, 15, 16],
             "unlisted_paintings": [12, 13, 14, 15, 16],
             "base_value": [0, 0, 0, 0, 0],
             "hand_will_receive": None,
             "remaining_round": 4,
-            "hand_receive_per_round": [8, 3, 3, 0],
+            "turn_player": random.randint(0, player_size - 1),
+            "purchased_paintings": [],
             "player": [{
                 "id": i,
                 "cash": 100,
@@ -23,29 +25,95 @@ class SimpleModernArt(object):
             } for i in range(player_size)],
             "game_modifier": {
                 "deal_evenly": False,
-                "seed": 6
+                "seed": 6,
+                "limit": 5,
+                "kinds": 5
             }
 
         }
         self.base_info["hand_will_receive"] = initialize_hand(self.base_info)
 
-    def auctuon(self, seller):
-        painting = request_auction(seller)
+    def game(self,):
+        """
+        1ゲーム
+        """
+        while self.base_info["remaining_round"] > 0:
+            tp = self.base_info["turn_player"]
+            ps = self.base_info["player_size"]
+            if self.auction(tp) == "ROUND CLOSE":
+                # pprint(self.base_info["player"])
+                self.round_close()
+                #print("REMAINING ROUND:", self.base_info["remaining_round"])
+                # pprint(self.base_info)
+            # pprint(self.base_info["player"])
+            # pprint(self.base_info["purchased_paintings"])
+            self.base_info["turn_player"] = (tp + 1) % ps
+            for player in self.base_info["player"]:
+                if player["hand"] != []:
+                    break
+            else:
+                break
+        self.finish()
+
+    def finish(self,):
+        players = self.base_info["player"]
+        cashs = []
+        for p in players:
+            cashs.append((p["cash"], p["id"]))
+        cashs = sorted(cashs, reverse=True)
+        winner = []
+        win_cash = -1
+        winner.append(cashs[0][1])
+        win_cash = cashs[0][0]
+        cashs.pop(0)
+        while cashs[0][1] == win_cash:
+            winner.append(cashs.pop(0)[0])
+
+        s = "finish "+str(win_cash)
+        for i in winner:
+            s += (" " + agent(i))
+        send(s)
+        print()
+        return s
+
+    def auction(self, seller):
+        """
+        オークション
+        """
+        painting = request_auction(seller, self.base_info)
+        if painting == "PASS":
+            return painting
+        self.base_info["purchased_paintings"].append(painting)
+        if self.check_finish():
+            self.base_info["player"][seller]["hand"].remove(painting)
+            send("round close")
+            return "ROUND CLOSE"
+
         bid = []
         psize = len(self.base_info["player"])
         for priority in range(psize):
             bidder = (seller+priority+1) % psize
             bid.append((
-                request_bid(painting, self.base_info["player"][bidder]["id"]),
+                request_bid(
+                    painting, self.base_info["player"][bidder]["id"], self.base_info),
                 -priority,
                 bidder
             ))
-        print(bid)
+        # print(bid)
         bid = list(sorted(bid, reverse=True))
         buyer = bid[0][2]
-        return self.transaction(buyer, seller, bid[0][0], painting)
+        result = self.transaction(buyer, seller, bid[0][0], painting)
+        send(result)
+        return result
 
-    def round_finish(self,):
+    def check_finish(self):
+        for kind in range(len(self.base_info["base_value"])):
+            # print(self.base_info["purchased_paintings"].count(kind))
+            if self.base_info["purchased_paintings"].count(kind) >= self.base_info["game_modifier"]["limit"]:
+                return True
+        return False
+
+    def round_close(self,):
         """
         ラウンド終了時の処理
         """
@@ -57,13 +125,13 @@ class SimpleModernArt(object):
         """
         購入カードの清算
         """
-        purchased = []
+        purchased = [i for i in range(len(self.base_info["base_value"]))]
         selp = self.base_info["sell_price"]
         for player in self.base_info["player"]:
             purchased.extend(player["purchased"])
         c = Counter(purchased)
         top = list(zip(*c.most_common(len(selp))))[0]
-        print(top)
+        # print(top)
         payment = [0 for i in range(len(self.base_info["player"]))]
         for i in range(len(selp)):
             self.base_info["base_value"][top[i]] += selp[i]
@@ -77,6 +145,7 @@ class SimpleModernArt(object):
 
         for player in self.base_info["player"]:
             player["purchased"].clear()
+        self.base_info["purchased_paintings"].clear()
 
         ret = "settle"
         for i in payment:
@@ -92,7 +161,6 @@ class SimpleModernArt(object):
         # 手札補充
         # print(self.base_info["hand_will_receive"][0])
         if self.base_info["hand_will_receive"][0] == []:
-            print("a")
             return
         for player in range(self.base_info["player_size"]):
             self.base_info["player"][player]["hand"].extend(
@@ -122,23 +190,30 @@ class SimpleModernArt(object):
         self.base_info["player"][buyer]["purchased"].append(painting)
         self.base_info["player"][seller]["cash"] += cost
         self.base_info["player"][seller]["hand"].remove(painting)
-        return "purchased "+agent(seller)+" "+agent(buyer)+" "+str(painting)+" "+str(cost)
+        return "purchased "+agent(buyer)+" "+agent(seller)+" "+str(painting)+" "+str(cost)
 
 
 def agent(num):
     return "Agent["+"{0:02d}".format(num) + "]"
 
 
-def request_auction(seller):
+def request_auction(seller, info):
     """
     出品リクエスト
     """
+    if info["player"][seller]["hand"] == []:
+        send("pass "+agent(seller))
+        return "PASS"
+
     item = random.randint(0, 4)
+    while item not in info["player"][seller]["hand"]:
+        item = random.randint(0, info["game_modifier"]["kinds"])
+
     send("sell "+agent(seller)+" "+str(item))
     return item
 
 
-def request_bid(item, bidder):
+def request_bid(item, bidder, info):
     """
     見積もりリクエスト
     """
@@ -188,8 +263,9 @@ def initialize_hand(info,):
 from pprint import pprint as pprint
 s = SimpleModernArt(5)
 s.deal()
-# pprint(s.base_info)
 """
+s.deal()
+# pprint(s.base_info)
 print(s.transaction(0, 1, 20, 0))
 print(s.transaction(1, 2, 20, 1))
 print(s.transaction(2, 3, 20, 2))
@@ -199,5 +275,6 @@ pprint(s.base_info)
 print(s.round_finish())
 pprint(s.base_info)
 """
-print(s.auctuon(0))
-pprint(s.base_info)
+# print(s.auction(0))
+s.game()
+pprint(s.base_info["player"])
