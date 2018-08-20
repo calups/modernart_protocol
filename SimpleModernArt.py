@@ -173,7 +173,7 @@ class SimpleModernArt(object):
         """
         取引成立時
         """
-        if self.base_info["player"][buyer]["cash"] - cost <= 0:
+        if self.base_info["player"][buyer]["cash"] - cost < 0:
             raise Exception("お金が足りません")
         if painting not in self.base_info["player"][seller]["hand"]:
             raise Exception("売る絵がありません")
@@ -201,6 +201,7 @@ def request_auction(seller, info):
     """
     出品リクエスト
     """
+    # 手札ゼロならパス
     if info["player"][seller]["hand"] == []:
         send("pass "+agent(seller))
         return "PASS"
@@ -217,7 +218,8 @@ def request_bid(item, bidder, info):
     """
     見積もりリクエスト
     """
-    bid = random.randint(10, 13)
+    bid = random.randint(0, 30)
+    bid = min(bid, info["player"][bidder]["cash"])
     send("bid " + agent(bidder)+" "+str(item)+" "+str(bid))
     return bid
 
