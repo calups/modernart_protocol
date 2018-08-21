@@ -3,7 +3,6 @@ import socket
 import ast
 import argparse
 
-host = '127.0.0.1'
 port = 10000
 backlog = 10
 bufsize = 4096
