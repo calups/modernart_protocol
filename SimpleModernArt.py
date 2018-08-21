@@ -2,6 +2,8 @@ import numpy as np
 import random
 from collections import Counter
 
+import Server as server
+
 
 class SimpleModernArt(object):
 
@@ -91,6 +93,7 @@ class SimpleModernArt(object):
 
         bid = []
         psize = len(self.base_info["player"])
+
         for priority in range(psize):
             bidder = (seller+priority+1) % psize
             bid.append((
@@ -206,7 +209,8 @@ def request_auction(seller, info):
         send("pass "+agent(seller))
         return "PASS"
 
-    item = random.randint(0, 4)
+    #item = random.randint(0, 4)
+    item=server.request_sell(socks[seller])
     while item not in info["player"][seller]["hand"]:
         item = random.randint(0, info["game_modifier"]["kinds"])
 
@@ -218,7 +222,8 @@ def request_bid(item, bidder, info):
     """
     見積もりリクエスト
     """
-    bid = random.randint(0, 30)
+    #bid = random.randint(0, 30)
+    bid=server.request_bid(socks[bidder])
     bid = min(bid, info["player"][bidder]["cash"])
     send("bid " + agent(bidder)+" "+str(item)+" "+str(bid))
     return bid
@@ -263,8 +268,10 @@ def initialize_hand(info,):
 
 
 from pprint import pprint as pprint
-s = SimpleModernArt(5)
-s.deal()
+size=1
+socks=server.connect(size)
+game = SimpleModernArt(size)
+game.deal()
 """
 s.deal()
 # pprint(s.base_info)
@@ -278,5 +285,5 @@ print(s.round_finish())
 pprint(s.base_info)
 """
 # print(s.auction(0))
-s.game()
+game.game()
 pprint(s.base_info["player"])
