@@ -1,5 +1,6 @@
 import simplemodernpy.Client as client
 from time import sleep
+import random
 
 class Agent(object):
 
@@ -11,12 +12,12 @@ class Agent(object):
         print(info)
         return
 
-    def purchase(self,purchase,info):
+    def purchase(self,result,info):
         """
         購入が成立した時に呼ばれる
         purchaseには買い手、絵、価格、売り手
         """
-        print(purchase)
+        print('result:',result)
         #print(info)
         return
 
@@ -26,9 +27,9 @@ class Agent(object):
         絵の番号を返せば良い
         手札にない番号を指定するとランダムで勝手に出品される
         """
-        #print(info)
-        sleep(1)
-        return 0
+        print('sell requuest')
+        sleep(0.01)
+        return random.randint(0,4)
 
     def bid(self,item,info):
         """
@@ -37,15 +38,15 @@ class Agent(object):
         itemは購入する絵
         所持金を超える入札は所持金と同額にクランプされる
         """
-        print(item)
-        sleep(1)
-        return 0
+        print('bid requset:',item)
+        sleep(0.01)
+        return random.randint(0,30)
         
     def roundover(self,payment,info):
         """
         ラウンド終了時に呼ばれる
         """
-        print(payment)
+        print('roundover:',payment)
         return
 
     def finish(self,info):

@@ -25,11 +25,10 @@ def connect(agent):
             if 'arg' in d:
                 arg=d['arg']
         except:
-            #print(data)
-            continue
-            #raise Exception("received data can't translate into dict")
+            #break
+            raise Exception("received data can't translate into dict")
 
-        print("Server|", request)      # サーバー側の書き込みを表示
+        #print("Server|", request)      # サーバー側の書き込みを表示
         #print(request)
         #print(info)
         # data = input("Client>")  # 入力待機
@@ -59,8 +58,9 @@ def connect(agent):
 
         if request.startswith("FINISH"):             # qが押されたら終了
             agent.finish(info)
-            soc.close()
             break
+
+    soc.close()
 
 
 

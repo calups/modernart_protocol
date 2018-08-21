@@ -1,8 +1,6 @@
 import numpy as np
 import random
 from collections import Counter
-from time import sleep
-import copy
 import Server as server
 
 
@@ -14,7 +12,6 @@ class SimpleModernArt(object):
             "sell_price": [30, 20, 10],
             "hand_receive_per_round": [8, 3, 3, 0],
             "total_paintings": [12, 13, 14, 15, 16],
-            "unlisted_paintings": [12, 13, 14, 15, 16],
             "base_value": [0, 0, 0, 0, 0],
             "hand_will_receive": None,
             "remaining_round": 4,
@@ -29,7 +26,7 @@ class SimpleModernArt(object):
             "game_modifier": {
                 "deal_evenly": False,
                 "seed": 6,
-                "limit": 2,
+                "limit": 5,
                 "kinds": 5
             }
 
@@ -76,7 +73,8 @@ class SimpleModernArt(object):
         s = "FINISH "+str(win_cash)
         for i in winner:
             s += (" " + agent(i))
-        broadcast(str({'request':s,'info':self.base_info}))
+        server.broadcast(str({'request':'FINISH','arg':winner,'info':self.base_info}))
+        server.log(s)
         return s
 
     def auction(self, seller):
@@ -106,10 +104,16 @@ class SimpleModernArt(object):
         bid = list(sorted(bid, reverse=True))
         buyer = bid[0][2]
         result = self.transaction(buyer, seller, bid[0][0], painting)
-        broadcast_personal({'request':'PURCHASE','arg':dict(zip(
-                            ['buyer','paint','price','seller'],
-                            list(result)
-                            ))},self.base_info)
+        bid_hist={}
+        for i in bid:
+            bid_hist[i[2]]=i[0]
+        server.broadcast_personal({'request':'PURCHASE','arg':{
+            'result':dict(zip(
+                    ['buyer','paint','price','seller'],
+                    list(result)
+                    )),
+            'bids':bid_hist}}
+            ,self.base_info)
         return result
 
     def check_finish(self):
@@ -154,10 +158,11 @@ class SimpleModernArt(object):
         self.base_info["purchased_paintings"].clear()
 
         ret = "ROUNDOVER"
-        #for i in payment:
-        #    ret += (" "+str(i))
+        for i in payment:
+            ret += (" "+str(i))
+        server.log(ret)
 
-        broadcast_personal({'request':ret,
+        server.broadcast_personal({'request':'ROUNDOVER',
                             'arg':dict(zip([i for i in range(self.base_info['player_size'])],payment))
                             },self.base_info)
 
@@ -173,8 +178,9 @@ class SimpleModernArt(object):
         if self.base_info["hand_will_receive"][0] == []:
             return
         for player in range(self.base_info["player_size"]):
-            self.base_info["player"][player]["hand"].extend(
-                self.base_info["hand_will_receive"][player].pop(0))
+            receive=self.base_info["hand_will_receive"][player].pop(0)
+            server.log('DEAL '+agent(player)+' '+str(sorted(receive)))
+            self.base_info["player"][player]["hand"].extend(receive)
             self.base_info["player"][player]["hand"] = sorted(
                 self.base_info["player"][player]["hand"])
         return
@@ -193,25 +199,18 @@ class SimpleModernArt(object):
             self.base_info["player"][seller]["cash"] -= cost
             self.base_info["player"][seller]["hand"].remove(painting)
             self.base_info["player"][seller]["purchased"].append(painting)
-            return "purchased "+agent(seller)+" "+str(painting)+" "+str(cost)+" "+agent(seller)
-
-        # 普通の取引
-        self.base_info["player"][buyer]["cash"] -= cost
-        self.base_info["player"][buyer]["purchased"].append(painting)
-        self.base_info["player"][seller]["cash"] += cost
-        self.base_info["player"][seller]["hand"].remove(painting)
+        else:
+            # 普通の取引
+            self.base_info["player"][buyer]["cash"] -= cost
+            self.base_info["player"][buyer]["purchased"].append(painting)
+            self.base_info["player"][seller]["cash"] += cost
+            self.base_info["player"][seller]["hand"].remove(painting)
+        server.log('PURCHASE '+agent(seller)+" "+str(painting)+" "+str(cost)+" "+agent(seller))
         return agent(buyer),str(painting),str(cost),agent(seller)
 
 def agent(num):
     return "Agent["+"{0:02d}".format(num) + "]"
 
-def accessible_info(player,info):
-    ret=copy.deepcopy(info)
-    ret.pop('hand_will_receive')
-    for p in range(info["player_size"]):
-        if p!=player:
-            ret['player'][p]['hand']=len(info['player'][p]['hand'])
-    return ret
 
 def request_auction(seller, info):
     """
@@ -219,14 +218,14 @@ def request_auction(seller, info):
     """
     # 手札ゼロならパス
     if info["player"][seller]["hand"] == []:
-        broadcast("PASS "+agent(seller))
+        #server.broadcast("PASS "+agent(seller))
         return "PASS"
 
     #item = random.randint(0, 4)
-    item=server.request_sell(socks[seller],accessible_info(seller,info))
+    item=server.request_sell(socks[seller],server.accessible_info(seller,info))
     while item not in info["player"][seller]["hand"]:
         item = random.randint(0, info["game_modifier"]["kinds"])
-
+    server.log('SELL '+agent(seller)+' '+str(item))
     return item
 
 
@@ -235,26 +234,11 @@ def request_bid(item, bidder, info):
     見積もりリクエスト
     """
     #bid = random.randint(0, 30)
-    bid=server.request_bid(socks[bidder],item,accessible_info(bidder,info))
+    bid=server.request_bid(socks[bidder],item,server.accessible_info(bidder,info))
     bid = min(bid, info["player"][bidder]["cash"])
+    server.log('BID '+agent(bidder)+' '+str(bid))
     return bid
 
-
-def broadcast(s):
-    print("BROAD:", s)
-    for sock in socks:
-        sock.send(s.encode())
-    sleep(0.01)
-    return
-
-def broadcast_personal(dic,info):
-    print("BROPE:",dic)
-    for i in range(info['player_size']):
-        ret=accessible_info(i,info)
-        dic['info']=ret
-        socks[i].send(str(dic).encode())
-    sleep(0.01)
-    return
 
 def initialize_hand(info,):
     """
@@ -290,7 +274,7 @@ def initialize_hand(info,):
 
 
 from pprint import pprint as pprint
-size=2
+size=5
 game = SimpleModernArt(size)
 socks=server.connect(size,game.base_info)
 game.deal()
@@ -308,4 +292,4 @@ pprint(s.base_info)
 """
 # print(s.auction(0))
 game.game()
-pprint(game.base_info["player"])
+#pprint(game.base_info["player"])
