@@ -4,6 +4,11 @@ from collections import Counter
 import Server as server
 import argparse
 
+RPR={
+    3:[10,6,6],
+    4:[9,4,4],
+    5:[8,3,3],
+}
 
 class SimpleModernArt(object):
 
@@ -11,7 +16,7 @@ class SimpleModernArt(object):
         self.base_info = {
             "player_size": player_size,
             "sell_price": [30, 20, 10],
-            "hand_receive_per_round": [8, 3, 3, 0],
+            "hand_receive_per_round": RPR[5] if player_size==5 else RPR[4] if player_size==4 else RPR[3],
             "total_paintings": [12, 13, 14, 15, 16],
             "base_value": [0, 0, 0, 0, 0],
             "hand_will_receive": None,
@@ -291,9 +296,14 @@ parser.add_argument("-s","--size", #オプション引数
                     help="how many player joins this game", #引数の説明
                     default=5
                     )
+parser.add_argument("-v","--verbose", #オプション引数
+                    help="detail of console output (not applied to log file.)", #引数の説明
+                    default=2
+                    )
 
 args = parser.parse_args()
 server.port=int(args.port)
+server.verbose=int(args.verbose)
 size=int(args.size)
 
 game = SimpleModernArt(size)

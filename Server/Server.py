@@ -10,6 +10,7 @@ port = 10000
 backlog = 10
 bufsize = 4096
 
+verbose=3
 playersize = 3
 socks = []
 log_data=[]
@@ -94,9 +95,12 @@ def broadcast_personal(dic,info):
     return
 
 def log(s):
-    #if 'BID' not in s and 'SELL' not in s:
-    print(s)
     log_data.append(s)
+    if verbose<=2 and ('BID' in s or 'SELL' in s):
+        return
+    if verbose<=1 and ('PURCHASE' in s or 'DEAL' in s or 'ROUNDOVER' in s):
+        return
+    print(s)
 
 
 def agent(num):
