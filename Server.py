@@ -1,6 +1,7 @@
 from __future__ import print_function
 import socket
 import select
+import json
 
 host = '127.0.0.1'
 port = 10000
@@ -27,7 +28,7 @@ def main():
             break
 
 
-def connect(size):
+def connect(size,info):
     socks = []
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((host, port))
@@ -40,7 +41,7 @@ def connect(size):
     print('successfully connected with', len(socks), 'clients.')
 
     for soc in socks:
-        soc.send('INITIALIZE'.encode())
+        soc.send(str({'request':'INITIALIZE','info':info}).encode())
 
     tmp = 0
     for soc in socks:
@@ -51,10 +52,13 @@ def connect(size):
             raise Exception('initialize failed.')
     return socks
 
-def request_sell(sock):
-    msg='SELL'
-    print(msg)
-    sock.send(bytes(msg, 'utf-8'))
+
+def request_sell(sock,info):
+    
+    command='SELL'
+    print(command)
+    msg=str({'request':command,'info':info})
+    sock.send(msg.encode())
     recv = sock.recv(bufsize).decode()
     result=-1
     try:
@@ -63,13 +67,24 @@ def request_sell(sock):
         raise Exception('painting id must be int.')
     return int(recv)
 
-def request_bid(sock):
-    msg = 'BID'
-    print(msg)
-    sock.send(bytes(msg, 'utf-8'))
+def request_bid(sock,item,info):
+    command = 'BID '+str(item)
+    print(command)
+    msg=str({'request':command,'info':info})
+    sock.send(msg.encode())
     recv = sock.recv(bufsize).decode()
     return int(recv)
 
+def request_finish(sock,winner,cash):
+    command='FINISH'
+    print(command)
+    msg=str({'request':command,'info':info})
+    msg+=agent(winner)+' '+ cash
+    sock.send(msg.encode())
+
+
+def agent(num):
+    return "Agent["+"{0:02d}".format(num) + "]"
 
 if __name__ == '__main__':
     connect(3)
