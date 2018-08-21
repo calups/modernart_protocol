@@ -18,6 +18,7 @@ def connect(size,info):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((host, port))
     s.listen(size)
+    print('port:',port)
     print('waiting for',size, 'connection...')
     for i in range(size):
         soc, addr = s.accept()          # 要求が来るまでブロック
@@ -98,9 +99,6 @@ def log(s):
     log_data.append(s)
 
 
-
 def agent(num):
     return "Agent["+"{0:02d}".format(num) + "]"
 
-if __name__ == '__main__':
-    connect(3)

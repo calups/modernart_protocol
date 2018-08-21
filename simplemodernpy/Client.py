@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import socket
 import ast
+import argparse
 
 host = '127.0.0.1'
 port = 10000
@@ -62,7 +63,24 @@ def connect(agent):
 
     soc.close()
 
-
-
 if __name__ == '__main__':
     main()
+
+parser = argparse.ArgumentParser(
+        prog="Server.py", #プログラム名
+        usage="run this", #プログラムの利用方法
+        description="desc", #「optional arguments」の前に表示される説明文
+        epilog = "with no args, connect to localhost:10000.", #「optional arguments」後に表示される文字列
+        add_help = True #[-h],[--help]オプションをデフォルトで追加するか
+        )
+parser.add_argument("-t","--host", #オプション引数
+                help="host to connect", #引数の説明
+                default='localhost'
+                )
+parser.add_argument("-p","--port", #オプション引数
+                    help="port to connect", #引数の説明
+                    default=10000
+                    )
+args = parser.parse_args()
+host=args.host
+port=int(args.port)

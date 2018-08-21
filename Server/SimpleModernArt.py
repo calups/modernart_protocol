@@ -2,6 +2,7 @@ import numpy as np
 import random
 from collections import Counter
 import Server as server
+import argparse
 
 
 class SimpleModernArt(object):
@@ -272,24 +273,30 @@ def initialize_hand(info,):
 
     return hand
 
-
 from pprint import pprint as pprint
-size=5
+
+parser = argparse.ArgumentParser(
+        prog="Server.py", #プログラム名
+        usage="run this", #プログラムの利用方法
+        description="desc", #「optional arguments」の前に表示される説明文
+        epilog = "With no args, use port 10000 and wait 5 players.", #「optional arguments」後に表示される文字列
+        add_help = True #[-h],[--help]オプションをデフォルトで追加するか
+        )
+
+parser.add_argument("-p","--port", #オプション引数
+                    help="port to connect", #引数の説明
+                    default=10000
+                    )
+parser.add_argument("-s","--size", #オプション引数
+                    help="how many player joins this game", #引数の説明
+                    default=5
+                    )
+
+args = parser.parse_args()
+server.port=int(args.port)
+size=int(args.size)
+
 game = SimpleModernArt(size)
 socks=server.connect(size,game.base_info)
 game.deal()
-"""
-s.deal()
-# pprint(s.base_info)
-print(s.transaction(0, 1, 20, 0))
-print(s.transaction(1, 2, 20, 1))
-print(s.transaction(2, 3, 20, 2))
-print(s.transaction(3, 4, 20, 2))
-print(s.transaction(4, 0, 20, 1))
-pprint(s.base_info)
-print(s.round_finish())
-pprint(s.base_info)
-"""
-# print(s.auction(0))
 game.game()
-#pprint(game.base_info["player"])
