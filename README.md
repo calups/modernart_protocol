@@ -1,17 +1,19 @@
 シンプルモダンアートプロトコル
 ====
 
-競りゲームの傑作「モダンアート」を単純化し、TCP通信でAI同士の対戦ができるようにしたものです。
+競りゲームの傑作「モダンアート」を単純化し、ソケット通信でAI同士の対戦ができるようにしたものです。
+
+## デモ
+![デモ](https://imgur.com/YEtB1Kw.gif)
 
 ## とりあえず試したい
 
+    git clone https://sav_slug@bitbucket.org/sav_slug/modernart_protocol.git
+    cd modernart_protocol
     python Server/SimpleModern.py &
     python 5mura.sh &
     
 サーバーとサンプルエージェント5体が立ち上がります。
-
-## デモ
-![デモ](https://imgur.com/YEtB1Kw.gif)
 
 ## シンプルモダンアート
 
@@ -32,6 +34,9 @@ http://www.newgamesorder.jp/games/modernart
 の下の方からモダンアート.pdfをダウンロードして読んだ後、ここから5行くらい上に目を通してください。
 
 ## Requirement
+
+Python3で動作確認。
+特別なモジュールは必要ない（はず）
 
 ## 使い方
 
