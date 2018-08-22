@@ -17,6 +17,7 @@ def connect(agent):
         request=''
         info=''
         arg=''
+        #print(data)
         try:
             d=ast.literal_eval(data)
             #print(d)
@@ -25,7 +26,7 @@ def connect(agent):
             if 'arg' in d:
                 arg=d['arg']
         except:
-            #break
+            break
             raise Exception("received data can't translate into dict",data)
 
         #print("Server|", request)      # サーバー側の書き込みを表示
@@ -35,7 +36,7 @@ def connect(agent):
         # soc.send(data.encode())              # ソケットに入力したデータを送信
         if request=='INITIALIZE':
             #print('initialize')
-            name=agent.initialize(info)
+            name=agent.initialize(arg,info)
             soc.send(name.encode())
 
         if request.startswith('PURCHASE'):
@@ -57,7 +58,7 @@ def connect(agent):
             agent.roundover(arg,info)
 
         if request.startswith("FINISH"):             # qが押されたら終了
-            agent.finish(info)
+            agent.finish(arg,info)
             #break
 
         if request.startswith("DISCONNECT"):

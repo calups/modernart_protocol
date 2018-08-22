@@ -30,18 +30,16 @@ def connect(size):
     return socks
 
 def initialize(size,info):
-    for soc in socks:
-        soc.send(str({'request':'INITIALIZE','info':info}).encode())
-        #print('initialize')
 
     tmp = 0
     for soc in socks:
-        tmp += 1
+        soc.send(str({'request':'INITIALIZE','arg':tmp,'info':accessible_info(tmp,info)}).encode())
         data = soc.recv(bufsize).decode()
         #print('Client[' + str(tmp) + ']> ', data)
         while data in names:
             data+='*'
         names.append(data)
+        tmp += 1
 
     for i in range(size):
         ret='INITIALIZE '+agent(i)+' '+names[i]
@@ -73,7 +71,7 @@ def request_bid(sock,item,info):
 def request_finish(sock,winner,cash):
     command='FINISH'
     #print(command)
-    msg=str({'request':command,'info':info})
+    msg=str({'request':command,'arg':winner,'info':info})
     msg+=agent(winner)+' '+ cash
     sock.send(msg.encode())
 
@@ -81,6 +79,7 @@ def request_finish(sock,winner,cash):
 def accessible_info(player,info):
     ret=copy.deepcopy(info)
     ret.pop('hand_will_receive')
+    ret.pop('game_modifier')
     for p in range(info["player_size"]):
         if p!=player:
             ret['player'][p]['hand']=len(info['player'][p]['hand'])

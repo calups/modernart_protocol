@@ -30,7 +30,7 @@ class SimpleModernArt(object):
             "game_modifier": {
                 "deal_evenly": False,
                 "seed": 6,
-                "limit": 5,
+                "limit": int(args.limit),
                 "kinds": 5,
                 "sell_price": [30, 20, 10],
                 "hand_receive_per_round": RPR[5] if player_size==5 else RPR[4] if player_size==4 else RPR[3],
@@ -298,6 +298,7 @@ def games(remain):
     games(remain-1)
     return
 
+
 from pprint import pprint as pprint
 
 parser = argparse.ArgumentParser(
@@ -320,6 +321,14 @@ parser.add_argument("-v","--verbose", #オプション引数
                     help="detail of console output (not applied to log file.)", #引数の説明
                     default=3
                     )
+parser.add_argument('-g',"--game",
+                    help="how many games to run",
+                    default=1
+                    )
+parser.add_argument('-l',"--limit",
+                    help="how many paintings needed to end round",
+                    default=5
+                    )
 
 args = parser.parse_args()
 server.port=int(args.port)
@@ -327,8 +336,4 @@ server.verbose=int(args.verbose)
 size=int(args.size)
 
 socks=server.connect(size)
-
-#game = SimpleModernArt(size)
-#server.initialize(size,game.base_info)
-#game.game()
-games(10)
+games(int(args.game))
