@@ -46,7 +46,7 @@ class SimpleModernArt(object):
         while self.base_info["remaining_round"] > 0:
             tp = self.base_info["turn_player"]
             ps = self.base_info["player_size"]
-            if self.auction(tp) == "ROUND CLOSE":
+            if self.auction(tp) == "ROUND OVER":
                 # pprint(self.base_info["player"])
                 self.round_close()
                 #print("REMAINING ROUND:", self.base_info["remaining_round"])
@@ -93,7 +93,7 @@ class SimpleModernArt(object):
         self.base_info["purchased_paintings"].append(painting)
         if self.check_finish():
             self.base_info["player"][seller]["hand"].remove(painting)
-            return "ROUND CLOSE"
+            return "ROUND OVER"
 
         bid = []
         psize = len(self.base_info["player"])
@@ -151,12 +151,13 @@ class SimpleModernArt(object):
         payment = [0 for i in range(len(self.base_info["player"]))]
         for i in range(len(selp)):
             self.base_info["base_value"][top[i]] += selp[i]
+            bv=self.base_info["base_value"]
             tmp = 0
             for player in self.base_info["player"]:
                 while top[i] in player["purchased"]:
                     player["purchased"].remove(top[i])
-                    player["cash"] += selp[i]
-                    payment[tmp] += selp[i]
+                    player["cash"] += bv[i]
+                    payment[tmp] += bv[i]
                 tmp += 1
 
         for player in self.base_info["player"]:
@@ -205,13 +206,14 @@ class SimpleModernArt(object):
             self.base_info["player"][seller]["cash"] -= cost
             self.base_info["player"][seller]["hand"].remove(painting)
             self.base_info["player"][seller]["purchased"].append(painting)
+            server.log('PURCHASE '+agent(seller)+" "+str(painting)+" "+str(cost)+" "+agent(seller))
         else:
             # 普通の取引
             self.base_info["player"][buyer]["cash"] -= cost
             self.base_info["player"][buyer]["purchased"].append(painting)
             self.base_info["player"][seller]["cash"] += cost
             self.base_info["player"][seller]["hand"].remove(painting)
-        server.log('PURCHASE '+agent(seller)+" "+str(painting)+" "+str(cost)+" "+agent(seller))
+            server.log('PURCHASE '+agent(buyer)+" "+str(painting)+" "+str(cost)+" "+agent(seller))
         return agent(buyer),str(painting),str(cost),agent(seller)
 
 def agent(num):

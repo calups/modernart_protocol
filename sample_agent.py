@@ -18,7 +18,7 @@ class Agent(object):
         purchaseには買い手、絵、価格、売り手
         """
         print('result:',result)
-        #print(info)
+        print(info)
         return
 
     def sell(self,info):
@@ -28,7 +28,7 @@ class Agent(object):
         手札にない番号を指定するとランダムで勝手に出品される
         """
         print('sell requuest')
-        sleep(0.01)
+        sleep(0.1)
         return random.randint(0,4)
 
     def bid(self,item,info):
@@ -39,13 +39,14 @@ class Agent(object):
         所持金を超える入札は所持金と同額にクランプされる
         """
         print('bid requset:',item)
-        sleep(0.01)
+        sleep(0.1)
         return random.randint(0,30)
         
     def roundover(self,payment,info):
         """
         ラウンド終了時に呼ばれる
         """
+        print(info)
         print('roundover:',payment)
         return
 
