@@ -26,7 +26,7 @@ def connect(agent):
                 arg=d['arg']
         except:
             #break
-            raise Exception("received data can't translate into dict")
+            raise Exception("received data can't translate into dict",data)
 
         #print("Server|", request)      # サーバー側の書き込みを表示
         #print(request)
@@ -58,6 +58,9 @@ def connect(agent):
 
         if request.startswith("FINISH"):             # qが押されたら終了
             agent.finish(info)
+            #break
+
+        if request.startswith("DISCONNECT"):
             break
 
     soc.close()

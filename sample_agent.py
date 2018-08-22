@@ -33,7 +33,7 @@ class Agent(object):
         手札にない番号を指定するとランダムで勝手に出品される
         """
         print('sell requuest')
-        sleep(0.01)
+        sleep(0.001)
         return random.randint(0,4)
 
     def bid(self,item,info):
@@ -44,7 +44,7 @@ class Agent(object):
         所持金を超える入札は所持金と同額にクランプされる
         """
         print('bid requset:',item)
-        sleep(0.01)
+        sleep(0.001)
         return random.randint(0,30)
         
     def roundover(self,payment,info):

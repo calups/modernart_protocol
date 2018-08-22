@@ -16,7 +16,7 @@ socks = []
 names=[]
 log_data=[]
 
-def connect(size,info):
+def connect(size):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.bind((host, port))
     s.listen(size)
@@ -27,7 +27,9 @@ def connect(size,info):
         socks.append(soc)
         print("conneted from", str(addr),)  # サーバ側の合図
     print('successfully connected with', len(socks), 'clients.')
+    return socks
 
+def initialize(size,info):
     for soc in socks:
         soc.send(str({'request':'INITIALIZE','info':info}).encode())
         #print('initialize')
@@ -44,7 +46,7 @@ def connect(size,info):
     for i in range(size):
         ret='INITIALIZE '+agent(i)+' '+names[i]
         log(ret)
-    return socks
+    return
 
 
 def request_sell(sock,info):
@@ -111,7 +113,9 @@ def log(s):
         return
     if verbose<=2 and ('PURCHASE' in s):
         return
-    if verbose<=1 and ('DEAL' in s or 'ROUNDOVER' in s):
+    if verbose<=1 and ('DEAL' in s or 'ROUNDOVER' in s or 'SETTLE' in s):
+        return
+    if verbose==0:
         return
     print(s)
 

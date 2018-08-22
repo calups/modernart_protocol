@@ -43,6 +43,7 @@ class SimpleModernArt(object):
         """
         1ゲーム
         """
+        self.deal()
         while self.base_info["remaining_round"] > 0:
             tp = self.base_info["turn_player"]
             ps = self.base_info["player_size"]
@@ -79,8 +80,8 @@ class SimpleModernArt(object):
         s = "FINISH "+str(win_cash)
         for i in winner:
             s += (" " + agent(i))
-        server.broadcast(str({'request':'FINISH','arg':winner,'info':self.base_info}))
         server.log(s)
+        server.broadcast(str({'request':'FINISH','arg':winner,'info':self.base_info}))
         return s
 
     def auction(self, seller):
@@ -288,6 +289,15 @@ def initialize_hand(info,):
 
     return hand
 
+def games(remain):
+    if remain==0:
+        return
+    game = SimpleModernArt(size)
+    server.initialize(size,game.base_info)
+    game.game()
+    games(remain-1)
+    return
+
 from pprint import pprint as pprint
 
 parser = argparse.ArgumentParser(
@@ -316,7 +326,9 @@ server.port=int(args.port)
 server.verbose=int(args.verbose)
 size=int(args.size)
 
-game = SimpleModernArt(size)
-socks=server.connect(size,game.base_info)
-game.deal()
-game.game()
+socks=server.connect(size)
+
+#game = SimpleModernArt(size)
+#server.initialize(size,game.base_info)
+#game.game()
+games(10)
