@@ -2,7 +2,12 @@ import simplemodernpy.Client as client
 from time import sleep
 import random
 
+myname='test1'
+
 class Agent(object):
+
+    def __init__(self,agent_name):
+        self.myname=agent_name
 
     def initialize(self,info):
         """
@@ -10,7 +15,7 @@ class Agent(object):
         __init__ではない
         """
         print(info)
-        return
+        return self.myname
 
     def purchase(self,result,info):
         """
@@ -58,7 +63,7 @@ class Agent(object):
         print(info)
         return
 
-agent=Agent()
+agent=Agent(myname)
 
 # run
 if __name__ == '__main__':

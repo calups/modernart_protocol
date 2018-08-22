@@ -169,10 +169,10 @@ class SimpleModernArt(object):
             ret+=' '+str(i)
         server.log(ret)
 
-        ret = "SETTLE"
-        for i in payment:
-            ret += (" "+str(i))
-        server.log(ret)
+        
+        for i in range(len(payment)):
+            ret = "SETTLE "+agent(i)+' '+str(payment[i])
+            server.log(ret)
 
         server.broadcast_personal({'request':'ROUNDOVER',
                                     'arg':{

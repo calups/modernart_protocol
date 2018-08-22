@@ -13,6 +13,7 @@ bufsize = 4096
 verbose=3
 playersize = 3
 socks = []
+names=[]
 log_data=[]
 
 def connect(size,info):
@@ -36,8 +37,13 @@ def connect(size,info):
         tmp += 1
         data = soc.recv(bufsize).decode()
         #print('Client[' + str(tmp) + ']> ', data)
-        if data != 'accept':
-            raise Exception('initialize failed.')
+        while data in names:
+            data+='*'
+        names.append(data)
+
+    for i in range(size):
+        ret='INITIALIZE '+agent(i)+' '+names[i]
+        log(ret)
     return socks
 
 

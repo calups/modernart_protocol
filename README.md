@@ -12,8 +12,8 @@ Simple Modern Art Protocol
     git clone https://github.com/calups/modernart_protocol
     cd modernart_protocol
     python Server/SimpleModern.py &
-    ./5mura.sh &
-    
+    ./5mura.sh
+
 サーバーとサンプルエージェント5体が立ち上がります。
 
 ## シンプルモダンアート
@@ -27,7 +27,7 @@ Simple Modern Art Protocol
 - 所持金が公開情報に。正規ルールでも正確にカウンティングすればわかってしまうため。
 - プレイヤー間での会話は不可。出品する絵と入札金額で想いを伝えよう。
 
-上記3点以外は正規のルールと全く同じです。
+上記4点以外は正規のルールと全く同じです。
 3人プレイ用の選択ルール、ダブルオークションに関する選択ルールは使用しません。
 
 正規ルールはhttp://www.newgamesorder.jp/games/modernart

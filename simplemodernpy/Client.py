@@ -35,8 +35,8 @@ def connect(agent):
         # soc.send(data.encode())              # ソケットに入力したデータを送信
         if request=='INITIALIZE':
             #print('initialize')
-            agent.initialize(info)
-            soc.send('accept'.encode())
+            name=agent.initialize(info)
+            soc.send(name.encode())
 
         if request.startswith('PURCHASE'):
             agent.purchase(arg,info)
