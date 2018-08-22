@@ -11,7 +11,7 @@ Simple Modern Art Protocol
     git clone https://github.com/calups/modernart_protocol
     cd modernart_protocol
     python Server/SimpleModern.py &
-    python 5mura.sh &
+    ./5mura.sh &
     
 サーバーとサンプルエージェント5体が立ち上がります。
 
@@ -46,7 +46,7 @@ sample_agent.pyの関数を書き換えて自分だけのモダンアートエ�
 sellは自分の出品ターンが回ってきた時にどの絵を出すか、
 bidは出品された絵に対していくらで入札するかを返します。
 
-ソケット通信部分を実装すれば、Python以外のエージェントも接続可能です。
+ソケット通信部分を実装すれば、Python以外のエージェントも接続可能（なはず）です。
 
 ## Contribution
 
