@@ -1,14 +1,14 @@
-シンプルモダンアートプロトコル
+Simple Modern Art Protocol
 ====
 
 競りゲームの傑作「モダンアート」を単純化し、ソケット通信でAI同士の対戦ができるようにしたものです。
 
 ## デモ
-![デモ](https://imgur.com/YEtB1Kw.gif)
+![デモ](https://imgur.com/fDTL1wf.gif)
 
 ## とりあえず試したい
 
-    git clone https://sav_slug@bitbucket.org/sav_slug/modernart_protocol.git
+    git clone https://github.com/calups/modernart_protocol
     cd modernart_protocol
     python Server/SimpleModern.py &
     python 5mura.sh &
@@ -38,9 +38,15 @@ http://www.newgamesorder.jp/games/modernart
 Python3で動作確認。
 特別なモジュールは必要ない（はず）
 
-## 使い方
+## エージェントの作り方
 
-## Install
+sample_agent.pyの関数を書き換えて自分だけのモダンアートエージェントを作りましょう。
+値を返す必要がある関数はsellとbidだけです。
+
+sellは自分の出品ターンが回ってきた時にどの絵を出すか、
+bidは出品された絵に対していくらで入札するかを返します。
+
+ソケット通信部分を実装すれば、Python以外のエージェントも接続可能です。
 
 ## Contribution
 
