@@ -15,8 +15,6 @@ class SimpleModernArt(object):
     def __init__(self, player_size):
         self.base_info = {
             "player_size": player_size,
-            "sell_price": [30, 20, 10],
-            "hand_receive_per_round": RPR[5] if player_size==5 else RPR[4] if player_size==4 else RPR[3],
             "total_paintings": [12, 13, 14, 15, 16],
             "base_value": [0, 0, 0, 0, 0],
             "hand_will_receive": None,
@@ -33,7 +31,9 @@ class SimpleModernArt(object):
                 "deal_evenly": False,
                 "seed": 6,
                 "limit": 5,
-                "kinds": 5
+                "kinds": 5,
+                "sell_price": [30, 20, 10],
+                "hand_receive_per_round": RPR[5] if player_size==5 else RPR[4] if player_size==4 else RPR[3],
             }
 
         }
@@ -134,15 +134,15 @@ class SimpleModernArt(object):
         ラウンド終了時の処理
         """
         self.base_info["remaining_round"] -= 1
+        self.settle()
         self.deal()
-        return self.settle()
 
     def settle(self,):
         """
         購入カードの清算
         """
         purchased = [i for i in range(len(self.base_info["base_value"]))]
-        selp = self.base_info["sell_price"]
+        selp = self.base_info['game_modifier']["sell_price"]
         for player in self.base_info["player"]:
             purchased.extend(player["purchased"])
         c = Counter(purchased)
@@ -156,22 +156,30 @@ class SimpleModernArt(object):
             for player in self.base_info["player"]:
                 while top[i] in player["purchased"]:
                     player["purchased"].remove(top[i])
-                    player["cash"] += bv[i]
-                    payment[tmp] += bv[i]
+                    player["cash"] += bv[top[i]]
+                    payment[tmp] += bv[top[i]]
                 tmp += 1
 
         for player in self.base_info["player"]:
             player["purchased"].clear()
         self.base_info["purchased_paintings"].clear()
 
-        ret = "ROUNDOVER"
+        ret ='ROUNDOVER'
+        for i in top:
+            ret+=' '+str(i)
+        server.log(ret)
+
+        ret = "SETTLE"
         for i in payment:
             ret += (" "+str(i))
         server.log(ret)
 
         server.broadcast_personal({'request':'ROUNDOVER',
-                            'arg':dict(zip([i for i in range(self.base_info['player_size'])],payment))
-                            },self.base_info)
+                                    'arg':{
+                                        'roundover':top,
+                                        'settle':dict(zip([i for i in range(self.base_info['player_size'])],payment))
+                                    }
+                                },self.base_info)
 
         return ret
 
@@ -252,7 +260,7 @@ def initialize_hand(info,):
     """
     手札の初期化
     """
-    if sum(info["hand_receive_per_round"]) * info["player_size"] > sum(info["total_paintings"]):
+    if sum(info['game_modifier']["hand_receive_per_round"]) * info["player_size"] > sum(info["total_paintings"]):
         raise Exception("配布予定の絵が全体の枚数を超えています")
     if info["game_modifier"]["seed"] != None:
         np.random.seed(info["game_modifier"]["seed"])
@@ -273,7 +281,7 @@ def initialize_hand(info,):
 
     for i in range(info["player_size"]):
         c = 0
-        for j in info["hand_receive_per_round"]:
+        for j in info['game_modifier']["hand_receive_per_round"]:
             hand[i].append(paintings[: j])
             paintings = paintings[j:]
             c += 1
@@ -300,7 +308,7 @@ parser.add_argument("-s","--size", #オプション引数
                     )
 parser.add_argument("-v","--verbose", #オプション引数
                     help="detail of console output (not applied to log file.)", #引数の説明
-                    default=2
+                    default=3
                     )
 
 args = parser.parse_args()

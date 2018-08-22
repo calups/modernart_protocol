@@ -94,11 +94,18 @@ def broadcast_personal(dic,info):
     sleep(0.01)
     return
 
+def info_cutter(info):
+    ret=copy.deepcopy(info)
+    ret.pop('game_modifier')
+    return ret
+
 def log(s):
     log_data.append(s)
-    if verbose<=2 and ('BID' in s or 'SELL' in s):
+    if verbose<=3 and ('BID' in s or 'SELL' in s):
         return
-    if verbose<=1 and ('PURCHASE' in s or 'DEAL' in s or 'ROUNDOVER' in s):
+    if verbose<=2 and ('PURCHASE' in s):
+        return
+    if verbose<=1 and ('DEAL' in s or 'ROUNDOVER' in s):
         return
     print(s)
 
