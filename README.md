@@ -4,7 +4,7 @@ Simple Modern Art Protocol
 競りゲームの傑作「モダンアート」を単純化し、ソケット通信でAI同士の対戦ができるようにしたものです。
 
 ## デモ
-<img src="/image/modern.gif?raw=true" width="200px">
+<img src="/image/modern.gif?raw=true" width="673px">
 
 ## とりあえず試したい
 
