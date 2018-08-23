@@ -5,6 +5,7 @@ Simple Modern Art Protocol
 サーバーと、通信周りの面倒ごとを処理済みのPythonクライアントテンプレートが入ってます。
 
 ## デモ
+
 <img src="/image/modern.gif?raw=true" width="673px">
 
 ## とりあえず試したい
@@ -48,6 +49,24 @@ bidは出品された絵に対していくらで入札するかを返します�
 
 ソケット通信部分を実装すれば、Python以外のエージェントも接続可能です。
 
-## Contribution
+## 通信方法の概要
+
+基本的にクライアントへの通信は以下のjson形式になっています。
+文字列から起こすライブラリを使って復元してください。
+
+    {
+        'request': REQUEST
+        'arg': ARG
+        'info': INFO
+    }
+
+requestにはINITIALIZE、SELL、BIDなど、どんな処理を要求しているかが格納されています。
+
+argにはrequestごとに異なる種類の情報が格納されています。
+例えばPURCHASEならば誰が何をいくらで誰から落札したのかと入札金額、
+ROUNDOVERならば清算金額などがわかります。
+
+infoにはその他の公開情報が格納されています。場に出ている絵の数や所持金はここから確認できます。
+
 
 ## Licence

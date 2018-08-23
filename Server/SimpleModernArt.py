@@ -49,7 +49,7 @@ class SimpleModernArt(object):
             ps = self.base_info["player_size"]
             if self.auction(tp) == "ROUND OVER":
                 # pprint(self.base_info["player"])
-                self.round_close()
+                self.round_over()
                 #print("REMAINING ROUND:", self.base_info["remaining_round"])
                 # pprint(self.base_info)
             # pprint(self.base_info["player"])
@@ -59,7 +59,7 @@ class SimpleModernArt(object):
                 if player["hand"] != []:
                     break
             else:
-                break
+                self.round_over()
         self.finish()
 
     def finish(self,):
@@ -114,13 +114,15 @@ class SimpleModernArt(object):
         bid_hist={}
         for i in bid:
             bid_hist[i[2]]=i[0]
-        server.broadcast_personal({'request':'PURCHASE','arg':{
-            'result':dict(zip(
-                    ['buyer','paint','price','seller'],
+
+        j={'request':'PURCHASE',
+            'arg':{'bid':bid_hist},
+            }
+        j['arg'].update(dict(zip(
+                    ['buyer','item','price','seller'],
                     list(result)
-                    )),
-            'bids':bid_hist}}
-            ,self.base_info)
+                    )))
+        server.broadcast_personal(j,self.base_info)
         return result
 
     def check_finish(self):
@@ -130,7 +132,7 @@ class SimpleModernArt(object):
                 return True
         return False
 
-    def round_close(self,):
+    def round_over(self,):
         """
         ラウンド終了時の処理
         """
@@ -178,7 +180,7 @@ class SimpleModernArt(object):
         server.broadcast_personal({'request':'ROUNDOVER',
                                     'arg':{
                                         'roundover':top,
-                                        'settle':dict(zip([i for i in range(self.base_info['player_size'])],payment))
+                                        'settle':payment,
                                     }
                                 },self.base_info)
 
@@ -223,7 +225,7 @@ class SimpleModernArt(object):
             self.base_info["player"][seller]["cash"] += cost
             self.base_info["player"][seller]["hand"].remove(painting)
             server.log('PURCHASE '+agent(buyer)+" "+str(painting)+" "+str(cost)+" "+agent(seller))
-        return agent(buyer),str(painting),str(cost),agent(seller)
+        return buyer,str(painting),str(cost),seller
 
 def agent(num):
     return "Agent["+"{0:02d}".format(num) + "]"

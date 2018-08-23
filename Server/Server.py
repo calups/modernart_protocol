@@ -46,7 +46,6 @@ def initialize(size,info):
         log(ret)
     return
 
-
 def request_sell(sock,info):
     command='SELL'
     #print(command)
