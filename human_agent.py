@@ -52,7 +52,6 @@ class Agent(object):
         ラウンド終了時に呼ばれる
         """
         print(payment)
-        print(info)
         return
 
     def finish(self,winner,info):
