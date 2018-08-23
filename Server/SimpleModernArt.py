@@ -48,12 +48,7 @@ class SimpleModernArt(object):
             tp = self.base_info["turn_player"]
             ps = self.base_info["player_size"]
             if self.auction(tp) == "ROUND OVER":
-                # pprint(self.base_info["player"])
                 self.round_over()
-                #print("REMAINING ROUND:", self.base_info["remaining_round"])
-                # pprint(self.base_info)
-            # pprint(self.base_info["player"])
-            # pprint(self.base_info["purchased_paintings"])
             self.base_info["turn_player"] = (tp + 1) % ps
             for player in self.base_info["player"]:
                 if player["hand"] != []:
@@ -257,7 +252,7 @@ def request_bid(item, bidder, info):
     """
     #bid = random.randint(0, 30)
     bid=server.request_bid(socks[bidder],item,server.accessible_info(bidder,info))
-    bid = min(bid, info["player"][bidder]["cash"])
+    bid = max(min(bid, info["player"][bidder]["cash"]),0)
     server.log('BID '+agent(bidder)+' '+str(bid))
     return bid
 
@@ -303,9 +298,6 @@ def games(remain):
     game.game()
     games(remain-1)
     return
-
-
-from pprint import pprint as pprint
 
 parser = argparse.ArgumentParser(
         prog="Server.py", #プログラム名
