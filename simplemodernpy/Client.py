@@ -10,6 +10,7 @@ bufsize = 4096
 
 def connect(agent):
     soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    soc.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     soc.connect((host, port))
 
     while(1):
@@ -22,12 +23,13 @@ def connect(agent):
             d=ast.literal_eval(data)
             #print(d)
             request=d['request']
-            info=d['info']
+            if 'info' in d:
+                info=d['info']
             if 'arg' in d:
                 arg=d['arg']
         except:
             break
-            raise Exception("received data can't translate into dict",data)
+            #raise Exception("received data can't translate into dict",data)
 
         #print("Server|", request)      # サーバー側の書き込みを表示
         #print(request)
@@ -59,15 +61,16 @@ def connect(agent):
 
         if request.startswith("FINISH"):             # qが押されたら終了
             agent.finish(arg,info)
-            #break
 
         if request.startswith("DISCONNECT"):
+            print('received DISCONNECT request.')
             break
 
     soc.close()
+    return
 
-if __name__ == '__main__':
-    main()
+#if __name__ == '__main__':
+#    main()
 
 parser = argparse.ArgumentParser(
         prog="Server.py", #プログラム名

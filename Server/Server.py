@@ -3,12 +3,15 @@ import socket
 import select
 import json
 import copy
+import random
 from time import sleep
+
 
 host = '127.0.0.1'
 port = 10000
 backlog = 10
 bufsize = 4096
+timeout=0
 
 verbose=3
 playersize = 3
@@ -18,23 +21,27 @@ log_data=[]
 
 def connect(size):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind((host, port))
     s.listen(size)
     print('port:',port)
     print('waiting for',size, 'connection...')
     for i in range(size):
         soc, addr = s.accept()          # 要求が来るまでブロック
+        soc.settimeout(timeout)
         socks.append(soc)
-        print("conneted from", str(addr),)  # サーバ側の合図
+        print("conneted ", str(addr),)  # サーバ側の合図
     print('successfully connected with', len(socks), 'clients.')
+    s.close()
     return socks
 
 def initialize(size,info):
-
+    #global socks
+    random.shuffle(socks)
     tmp = 0
     for soc in socks:
-        soc.send(str({'request':'INITIALIZE','arg':tmp,'info':accessible_info(tmp,info)}).encode())
-        data = soc.recv(bufsize).decode()
+        msg=str({'request':'INITIALIZE','arg':tmp,'info':accessible_info(tmp,info)})
+        data=send_recv(msg,soc)
         #print('Client[' + str(tmp) + ']> ', data)
         while data in names:
             data+='*'
@@ -50,8 +57,7 @@ def request_sell(sock,info):
     command='SELL'
     #print(command)
     msg=str({'request':command,'info':info})
-    sock.send(msg.encode())
-    recv = sock.recv(bufsize).decode()
+    recv=send_recv(msg,sock)
     result=-1
     try:
         result=int(recv)
@@ -63,8 +69,7 @@ def request_bid(sock,item,info):
     command = 'BID'
     #print(command)
     msg=str({'request':command,'arg':item,'info':info})
-    sock.send(msg.encode())
-    recv = sock.recv(bufsize).decode()
+    recv=send_recv(msg,sock)
     return int(recv)
 
 def request_finish(sock,winner,cash):
@@ -83,6 +88,18 @@ def accessible_info(player,info):
         if p!=player:
             ret['player'][p]['hand']=len(info['player'][p]['hand'])
     return ret
+
+def send_recv(msg,sock):
+    sock.send(msg.encode())
+    try:
+        recv=sock.recv(bufsize)
+        return recv.decode()
+    except socket.timeout:
+        sock.close()
+        timeout_sock=socks.index(sock)
+        #socks.remove(sock)
+        print('TIMEOUT Agent['+'{0:02d}'.format(timeout_sock)+']')
+        raise Exception('TIMEOUT Agent['+'{0:02d}'.format(timeout_sock)+']')
 
 def broadcast(s):
     #print("BROAD:", s)
@@ -104,6 +121,12 @@ def info_cutter(info):
     ret=copy.deepcopy(info)
     ret.pop('game_modifier')
     return ret
+
+def disconnect():
+    for i in socks:
+        i.send(str({'request':'DISCONNECT'}).encode())
+        i.close()
+    return
 
 def log(s):
     log_data.append(s)

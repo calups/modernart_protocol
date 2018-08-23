@@ -19,7 +19,7 @@ class SimpleModernArt(object):
             "base_value": [0, 0, 0, 0, 0],
             "hand_will_receive": None,
             "remaining_round": 4,
-            "turn_player": random.randint(0, player_size - 1),
+            "turn_player": 0,
             "purchased_paintings": [],
             "player": [{
                 "id": i,
@@ -144,24 +144,27 @@ class SimpleModernArt(object):
         """
         購入カードの清算
         """
-        purchased = [i for i in range(len(self.base_info["base_value"]))]
+        #purchased = [i for i in range(len(self.base_info["base_value"]))]
+        purchased=[]
         selp = self.base_info['game_modifier']["sell_price"]
         for player in self.base_info["player"]:
             purchased.extend(player["purchased"])
         c = Counter(purchased)
-        top = list(zip(*c.most_common(len(selp))))[0]
-        # print(top)
+        top=[]
         payment = [0 for i in range(len(self.base_info["player"]))]
-        for i in range(len(selp)):
-            self.base_info["base_value"][top[i]] += selp[i]
-            bv=self.base_info["base_value"]
-            tmp = 0
-            for player in self.base_info["player"]:
-                while top[i] in player["purchased"]:
-                    player["purchased"].remove(top[i])
-                    player["cash"] += bv[top[i]]
-                    payment[tmp] += bv[top[i]]
-                tmp += 1
+        if(len(c))!=0:
+            top = list(zip(*c.most_common(len(selp))))[0]
+            le=min(len(selp),len(top))
+            for i in range(le):
+                self.base_info["base_value"][top[i]] += selp[i]
+                bv=self.base_info["base_value"]
+                tmp = 0
+                for player in self.base_info["player"]:
+                    while top[i] in player["purchased"]:
+                        player["purchased"].remove(top[i])
+                        player["cash"] += bv[top[i]]
+                        payment[tmp] += bv[top[i]]
+                    tmp += 1
 
         for player in self.base_info["player"]:
             player["purchased"].clear()
@@ -293,6 +296,7 @@ def initialize_hand(info,):
 
 def games(remain):
     if remain==0:
+        server.disconnect()
         return
     game = SimpleModernArt(size)
     server.initialize(size,game.base_info)
@@ -331,11 +335,18 @@ parser.add_argument('-l',"--limit",
                     help="how many paintings needed to end round",
                     default=5
                     )
+parser.add_argument('-t',"--timeout",
+                    help="how long the server can wait client's response",
+                    default=10000000
+                    )
 
 args = parser.parse_args()
 server.port=int(args.port)
 server.verbose=int(args.verbose)
+server.timeout=int(args.timeout)*0.001
 size=int(args.size)
 
+if int(args.game)>1:
+    print('will play',args.game,'game')
 socks=server.connect(size)
 games(int(args.game))
