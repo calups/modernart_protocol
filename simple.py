@@ -47,11 +47,9 @@ class Agent(object):
         for player in info['player']:
             all_hands.extend(player['purchased'])
         ranking = hand_ranking(all_hands)
-        # print(all_hands)
-        # print(ranking)
+
         if item not in ranking:
             return random.randint(0, 5)
-
         elif ranking.index(item) == 0:
             return (info['base_value'][item]+30)//2
         elif ranking.index(item) == 1:
@@ -65,8 +63,6 @@ class Agent(object):
         """
         ラウンド終了時に呼ばれる
         """
-        print(info)
-        print('roundover:', payment)
         return
 
     def finish(self, winner, info):
@@ -74,7 +70,6 @@ class Agent(object):
         ゲーム終了時に呼ばれる
         ここで得られるinfoには全てのゲームデータが格納されている
         """
-        print(info)
         return
 
 
@@ -101,8 +96,6 @@ def hand_ranking(myhand):
 
 agent = Agent(myname)
 
-print(most_common_hand([0, 0, 0, 1, 2, 2, 3, 3, 4, 4, 4], True))
-print([0, 2, 3, 1, 4].index(1))
 # run
 if __name__ == '__main__':
     client.connect(agent)
