@@ -7,6 +7,7 @@ Simple Modern Art Protocol
 ## デモ
 
 5人対戦、微妙に賢いエージェントの対戦。
+
 <img src="/image/modern.gif?raw=true">
 
 ## とりあえず試したい
