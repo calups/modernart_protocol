@@ -75,6 +75,8 @@ class SimpleModernArt(object):
         s = "FINISH "+str(win_cash)
         for i in winner:
             s += (" " + agent(i))
+        for i in winner:
+            s+=(' '+server.get_name(i))
         server.log(s)
         server.broadcast(str({'request':'FINISH','arg':winner,'info':self.base_info}))
         return s
@@ -96,15 +98,23 @@ class SimpleModernArt(object):
 
         for priority in range(psize):
             bidder = (seller+priority+1) % psize
+            price=request_bid(
+                    painting, self.base_info["player"][bidder]["id"], self.base_info)
             bid.append((
-                request_bid(
-                    painting, self.base_info["player"][bidder]["id"], self.base_info),
+                price,
                 -priority,
                 bidder
             ))
         # print(bid)
+
+        #全員0ならsellerが最優先
         bid = list(sorted(bid, reverse=True))
-        buyer = bid[0][2]
+        buyer = seller
+        for i in bid:
+            if i[0] != 0:
+                buyer = bid[0][2]
+                break
+
         result = self.transaction(buyer, seller, bid[0][0], painting)
         bid_hist={}
         for i in bid:

@@ -58,6 +58,7 @@ class Agent(object):
         所持金を超える入札は所持金と同額に
         """
         pprint(info)
+
         print(item,'に対する入札額を決めてください。')
         return input('BID '+str(item)+'> ')
         

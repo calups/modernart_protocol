@@ -72,13 +72,14 @@ def request_bid(sock,item,info):
     recv=send_recv(msg,sock)
     return int(recv)
 
-def request_finish(sock,winner,cash):
+"""
+def request_finish(sock,winner,cash,info):
     command='FINISH'
     #print(command)
     msg=str({'request':command,'arg':winner,'info':info})
     msg+=agent(winner)+' '+ cash
     sock.send(msg.encode())
-
+"""
 
 def accessible_info(player,info):
     ret=copy.deepcopy(info)
@@ -144,3 +145,5 @@ def log(s):
 def agent(num):
     return "Agent["+"{0:02d}".format(num) + "]"
 
+def get_name(num):
+    return names[num]
